@@ -1,9 +1,17 @@
 module.exports = function (grunt) {
   grunt.initConfig({
+    concat: {
+      dist: {
+        src: [
+          'coffee/lsys.coffee',
+          'coffee/main.coffee'],
+        dest: 'test.coffee'
+      }
+    },    
     run: {
       eval: { 
         cmd: 'coffee',
-        args: ['main.coffee']
+        args: ['test.coffee']
       }
     },
     coffee: {
@@ -16,10 +24,11 @@ module.exports = function (grunt) {
     watch: {
       src: {
         files: ['coffee/*.coffee'],
-        tasks: ['coffee', 'run:eval']
+        tasks: ['concat:dist', 'run:eval']
       }
     }
   });
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-run');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-coffee');
