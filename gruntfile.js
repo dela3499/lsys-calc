@@ -1,25 +1,26 @@
-module.exports = function(grunt) {
-
+module.exports = function (grunt) {
   grunt.initConfig({
-//    pkg: grunt.file.readJSON('package.json'),
+    run: {
+      eval: { 
+        cmd: 'coffee',
+        args: ['main.coffee']
+      }
+    },
     coffee: {
       compile: {
         files: {
-          'all.js': 'coffee/*.coffee'
+          'src/js/main.js': 'src/coffee/*.coffee'
         }
       }
     },
     watch: {
-      files: ['coffee/*.coffee'],
-      tasks: ['default']
+      src: {
+        files: ['coffee/*.coffee'],
+        tasks: ['coffee', 'run:eval']
+      }
     }
   });
-
-//  grunt.loadNpmTasks('grunt-contrib-uglify');
-//  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-run');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-coffee');
-
-  grunt.registerTask('default', ["coffee"]);
-
 };
