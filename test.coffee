@@ -68,6 +68,7 @@ clone = (obj) ->
 class Lsys
   constructor: (params = {}) ->
     @params = params
+    @path = []
     @config = {
       timeout: 5 # timeout in seconds (if method times out, it will be noted in @errors)
     }
@@ -79,6 +80,7 @@ class Lsys
     }
     
     @compileRules(params)
+    @calcPath()
     return this
   isomorphic: (a,b) -> 
     " return true if n, rules, or seed properties differ between objects a and b "
@@ -87,14 +89,10 @@ class Lsys
     " Update parameters (and recompile rules if needed) "
     # don't recompile unless necessary (n, rules, or seed have changed)
     if not @isomorphic(params, @params)
-      @compileRules(params)
-    @params = params # update params
+      @compileRules(params)    
+    @params = params # update params (after original params have been compared to new ones above)
+    @calcPath() # with newly-set params
     return this # return object to allow method chaining (i.e. sys.setParams.getPath())
-  getDrawPath: ->
-    {
-      x: [1,2,3],
-      y: [1,2,3]
-    }
   compileRules: (params)->
     " Execute text-replacement on seed according to rules (repeated n times) "
     string = params.seed
@@ -114,77 +112,69 @@ class Lsys
     
     @compiledString = string # save fully-compiled string
     @errors.compilation = false # allows user to see compilation was successful
-    
-  getPath: ->
+  getPath: -> return @path
+  calcPath: ->
     " Generate path from compiled string and param values "
-    path = [] 
-    stack = [] # bookmarks a state to return to later in path definition
     state = clone(@params.pose)
+    state.stepSize = @params.size.value
+    state.stepAngle = @params.angle.value
+    path = [{x: state.x, y: state.y}] 
+    stack = [] # bookmarks a state to return to later in path definition
+    # execute turtle graphics drawing command
     for e in @compiledString
-      @turtle[e](state, params, path)
-  turtle: (command) ->
+      @turtle(e,[state, params, path, stack])
+    
+    @path = path # store path for later lookup with getPath()
+    
+  turtle: (command, args) ->
     " return function to execute turtle graphics drawing command"
     commands = {
-      "F": 1,
+      "F": (state, params, path) ->
+        " Move forward (in whatever direction you're facing) "
+        # update state
+        ang = (state.orientation % 360) * (Math.PI / 180)
+        state.x += Math.cos(ang)*state.stepSize
+        state.y += Math.sin(ang)*state.stepSize
+        # add point to path
+        path.push({x: state.x, y: state.y})
+      "+": (state) -> state.orientation += state.stepAngle
+      "-": (state) -> state.orientation -= state.stepAngle
+      "|": (state) -> state.orientation += 180
+      "[": (state, params, path, stack) -> 
+        " Save current state for a later return "
+        stack.push(clone(state))
+      "]": (state, params, path, stack) -> 
+        " Return to last saved state "
+        state = stack.pop()
+        path.push({x: state.x, y: state.y})
+      "!": (state) -> state.stepAngle *= -1
+      "(": (state, params) -> state.stepAngle *= (1 - params.angle.change)
+      ")": (state, params) -> state.stepAngle *= (1 + params.angle.change)
+      "<": (state, params) -> state.stepSize *= (1 + params.size.change)
+      ">": (state, params) -> state.stepSize *= (1 - params.size.change)
     }
-    return commands[command]
-      
-      
-#    "F": (state, params, g, context) ->
-#
-#      ang = ((state.orientation%360) / 180) * pi #todo - stop storing degrees?!
-#      state.x += cos(ang)*state.stepSize
-#      state.y += sin(ang)*state.stepSize
-#
-#      bounding = context.bounding
-#
-#      if (state.x < bounding.x1)
-#        bounding.x1 = state.x
-#      else if (state.x > bounding.x2)
-#        bounding.x2 = state.x
-#
-#      if (state.y < bounding.y1)
-#        bounding.y1 = state.y
-#      else if (state.y > bounding.y2)
-#        bounding.y2 = state.y
-#
-#      g.lineTo(state.x,state.y)
-#
-#    "+": (state) -> state.orientation += state.stepAngle
-#    "-": (state) -> state.orientation -= state.stepAngle
-#    "|": (state) -> state.orientation += 180
-#    #todo: push stack changes into RenderingContext class
-#    "[": (state, params, g, context) -> context.stack.push(cloneState state)
-#    "]": (state, params, g, context) -> context.state = state = context.stack.pop(); g.moveTo(state.x,state.y)
-#    "!": (state) -> state.stepAngle *= -1
-#    "(": (state, params) -> state.stepAngle *= (1 - params.angle.growth)
-#    ")": (state, params) -> state.stepAngle *= (1 + params.angle.growth)
-#    "<": (state, params) -> state.stepSize *= (1 + params.size.growth)
-#    ">": (state, params) -> state.stepSize *= (1 - params.size.growth)
-#    }
-    
-    
-    
-    
-    
-      
-  
-  
+
+    if commands[command]
+      # True for any drawing command
+      return commands[command](args...)
+    else 
+      # This will be the case for any rule name, or random character
+      return null # do nothing
 console.log("-----------------\n Running test \n-----------------")
 
 # Create params object
 params = {
-    seed: "A-BC",
+    seed: "ABC",
     rules: {
-        "A": "A-B",
-        "B": "BB",
-        "C": "AB>C"
+        "A": "AF+F",
+        "B": "ABF-F",
+        "C": "CABF[+F>+F]F"
     },
-    n: 5,
+    n: 1,
     pose: {
         x: 0,
         y: 0,
-        theta: 0
+        orientation: 0
     },
     size: {
         value: 10,
@@ -198,7 +188,7 @@ params = {
 
 # Initialize L-system with params
 sys = new Lsys(params)
-console.log(sys)
+console.log(sys.getPath())
 
 
 # Set parameters after initialization

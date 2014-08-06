@@ -2,17 +2,17 @@ console.log("-----------------\n Running test \n-----------------")
 
 # Create params object
 params = {
-    seed: "A-BC",
+    seed: "ABC",
     rules: {
-        "A": "A-B",
-        "B": "BB",
-        "C": "AB>C"
+        "A": "AF+F",
+        "B": "ABF-F",
+        "C": "CABF[+F>+F]F"
     },
-    n: 5,
+    n: 1,
     pose: {
         x: 0,
         y: 0,
-        theta: 0
+        orientation: 0
     },
     size: {
         value: 10,
@@ -26,7 +26,7 @@ params = {
 
 # Initialize L-system with params
 sys = new Lsys(params)
-console.log(sys)
+console.log(sys.getPath())
 
 
 # Set parameters after initialization
