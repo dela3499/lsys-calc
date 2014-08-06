@@ -3,6 +3,7 @@ module.exports = function (grunt) {
     concat: {
       dist: {
         src: [
+          'coffee/utils.coffee',
           'coffee/lsys.coffee',
           'coffee/test.coffee'],
         dest: 'test.coffee'

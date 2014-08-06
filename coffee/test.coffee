@@ -2,12 +2,13 @@ console.log("-----------------\n Running test \n-----------------")
 
 # Create params object
 params = {
-    seed: "A-B",
+    seed: "A-BC",
     rules: {
         "A": "A-B",
-        "B": "B-B"
+        "B": "BB",
+        "C": "AB>C"
     },
-    n: 1,
+    n: 5,
     pose: {
         x: 0,
         y: 0,
@@ -25,14 +26,16 @@ params = {
 
 # Initialize L-system with params
 sys = new Lsys(params)
+console.log(sys)
+
 
 # Set parameters after initialization
-sys = new Lsys()
-sys.setParams(params)
+#sys = new Lsys()
+#sys.setParams(params)
 
 # Get plot data from system
-sys.setParams(params).getDrawPath()
+#sys.setParams(params).getDrawPath()
 
 # Get compiled rules
-compiledRules = sys.compileRules()
-console.log compiledRules
+#compiledRules = sys.compileRules()
+#console.log compiledRules
