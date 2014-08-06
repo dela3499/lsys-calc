@@ -4,7 +4,7 @@ module.exports = function (grunt) {
       dist: {
         src: [
           'coffee/lsys.coffee',
-          'coffee/main.coffee'],
+          'coffee/test.coffee'],
         dest: 'test.coffee'
       }
     },    

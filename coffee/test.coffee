@@ -2,11 +2,12 @@ console.log("-----------------\n Running test \n-----------------")
 
 # Create params object
 params = {
-    rules: [
-        "H": "ABC",
-        "A": "HBC"
-    ],
-    levels: 10,
+    seed: "A-B",
+    rules: {
+        "A": "A-B",
+        "B": "B-B"
+    },
+    n: 1,
     pose: {
         x: 0,
         y: 0,
@@ -31,3 +32,7 @@ sys.setParams(params)
 
 # Get plot data from system
 sys.setParams(params).getDrawPath()
+
+# Get compiled rules
+compiledRules = sys.compileRules()
+console.log compiledRules
