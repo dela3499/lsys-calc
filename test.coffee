@@ -72,13 +72,11 @@ class Lsys
     @config = {
       timeout: 5 # timeout in seconds (if method times out, it will be noted in @errors)
     }
-
     # allow user to check if computations were allowed to complete
     @errors = {
       compilation: false,
       pathCreation: false
     }
-    
     @compileRules(params)
     @calcPath()
     return this
@@ -145,7 +143,16 @@ class Lsys
         stack.push(clone(state))
       "]": (state, params, path, stack) -> 
         " Return to last saved state "
-        state = stack.pop()
+        
+        # Update current state to match popped state
+        console.log(state)
+        pop = stack.pop()
+        console.log(["pop",pop])
+        for key of pop
+          console.log(key)
+          state[key] = pop[key]
+        console.log(state)  
+        # Add current state to path
         path.push({x: state.x, y: state.y})
       "!": (state) -> state.stepAngle *= -1
       "(": (state, params) -> state.stepAngle *= (1 - params.angle.change)
@@ -164,9 +171,9 @@ console.log("-----------------\n Running test \n-----------------")
 
 # Create params object
 params = {
-    seed: "ABC",
+    seed: "A",
     rules: {
-        "A": "AF+F",
+        "A": "F[+F]F",
         "B": "ABF-F",
         "C": "CABF[+F>+F]F"
     },
@@ -188,8 +195,19 @@ params = {
 
 # Initialize L-system with params
 sys = new Lsys(params)
-console.log(sys.getPath())
+#console.log(sys.getPath())
+path = sys.getPath()
+console.log(path)
+x = (e.x for e in path)
+y = (e.y for e in path)
 
+for data in path
+    console.log(data.x)
+console.log("")
+for data in path
+    console.log(data.y)
+console.log("")
+console.log(sys.compiledString)
 
 # Set parameters after initialization
 #sys = new Lsys()

@@ -5,13 +5,11 @@ class Lsys
     @config = {
       timeout: 5 # timeout in seconds (if method times out, it will be noted in @errors)
     }
-
     # allow user to check if computations were allowed to complete
     @errors = {
       compilation: false,
       pathCreation: false
     }
-    
     @compileRules(params)
     @calcPath()
     return this
@@ -78,7 +76,16 @@ class Lsys
         stack.push(clone(state))
       "]": (state, params, path, stack) -> 
         " Return to last saved state "
-        state = stack.pop()
+        
+        # Update current state to match popped state
+        console.log(state)
+        pop = stack.pop()
+        console.log(["pop",pop])
+        for key of pop
+          console.log(key)
+          state[key] = pop[key]
+        console.log(state)  
+        # Add current state to path
         path.push({x: state.x, y: state.y})
       "!": (state) -> state.stepAngle *= -1
       "(": (state, params) -> state.stepAngle *= (1 - params.angle.change)
