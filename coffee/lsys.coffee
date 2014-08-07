@@ -33,7 +33,7 @@ class Lsys
     for i in [1..params.n]
       # Break out of computation if it's taking too long
       currentTime = new Date().getTime()
-      if (currentTime - startTime)/1000 > @config.timeout 
+      if (currentTime - startTime)/1000 > @config.timeout
         @compiledString = string # save partially-compiled string (rather than throw error)
         @errors.compilation = "timeout" # lets user see if compilation completed
         return # stop computation
@@ -51,11 +51,20 @@ class Lsys
     state.stepAngle = @params.angle.value
     path = [{x: state.x, y: state.y}] 
     stack = [] # bookmarks a state to return to later in path definition
+    
+    startTime = new Date().getTime()
     # execute turtle graphics drawing command
     for e in @compiledString
+      # break out of loop if it's taking too long
+      if (new Date().getTime() - startTime)/1000 > @config.timeout 
+        break
+      # update state, stack, and path with each character of compiled string
       @turtle(e,[state, params, path, stack])
     
-    @path = path # store path for later lookup with getPath()
+    # put path into nicer format for export
+    x = (p.x for p in path)
+    y = (p.y for p in path)
+    @path = {x: x, y: y} # store path for later lookup with getPath()
     
   turtle: (command, args) ->
     " return function to execute turtle graphics drawing command"
@@ -78,13 +87,9 @@ class Lsys
         " Return to last saved state "
         
         # Update current state to match popped state
-        console.log(state)
         pop = stack.pop()
-        console.log(["pop",pop])
         for key of pop
-          console.log(key)
           state[key] = pop[key]
-        console.log(state)  
         # Add current state to path
         path.push({x: state.x, y: state.y})
       "!": (state) -> state.stepAngle *= -1

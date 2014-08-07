@@ -1,7 +1,7 @@
 module.exports = function (grunt) {
   grunt.initConfig({
     concat: {
-      dist: {
+      test: {
         src: [
           'coffee/utils.coffee',
           'coffee/lsys.coffee',
@@ -18,19 +18,34 @@ module.exports = function (grunt) {
     coffee: {
       compile: {
         files: {
-          'src/js/main.js': 'src/coffee/*.coffee'
+          'js/lsys.js': [
+            'coffee/utils.coffee',
+            'coffee/lsys.coffee'
+          ]
+        }
+      }
+    },
+    uglify: {
+      main: {
+        files: {
+          'js/lsys.min.js':'js/lsys.js'
         }
       }
     },
     watch: {
-      src: {
+      test: {
         files: ['coffee/*.coffee'],
-        tasks: ['concat:dist', 'run:eval']
-      }
+        tasks: ['coffee:compile','uglify:main','concat:test', 'run:eval']
+      },
+      dev: {
+        files: ['coffee/*.coffee'],
+        tasks: ['coffee:compile','uglify:main']
+      }      
     }
   });
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-run');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-coffee');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 };

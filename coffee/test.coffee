@@ -28,7 +28,7 @@ params = {
 sys = new Lsys(params)
 #console.log(sys.getPath())
 path = sys.getPath()
-console.log(path)
+console.log(["heres a path",path])
 x = (e.x for e in path)
 y = (e.y for e in path)
 
