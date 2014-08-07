@@ -48,7 +48,7 @@ As you can see, there 6 fields in the params object:
 5. size *object* - value is distance between points, change is used to vary this distance with each iteration
 6. angle *object* - value is angle of turns in path, change is used to vary this angle with each iteration
 
-The rules are the most complex and interested part of the params object. You can create as many rules as you like, and you can reference one rule from another. If, for instance, you have a rule "A": "B", then every occurence of "A" in a string will be replaced with a "B". 
+The rules are the most complex and interesting part of the params object. You can create as many rules as you like, and you can reference one rule from another. If, for instance, you have a rule "A": "B", then every occurence of "A" in a string will be replaced with a "B". 
 
 Here's a list of the turtle graphics drawing commands you can include in your rules: 
 
