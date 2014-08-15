@@ -49,7 +49,8 @@ class Lsys
     state = clone(@params.pose)
     state.stepSize = @params.size.value
     state.stepAngle = @params.angle.value
-    path = [{x: state.x, y: state.y}] 
+    pathX = [state.x]
+    pathY = [state.y]
     stack = [] # bookmarks a state to return to later in path definition
     
     startTime = new Date().getTime()
@@ -59,31 +60,29 @@ class Lsys
       if (new Date().getTime() - startTime)/1000 > @config.timeout 
         break
       # update state, stack, and path with each character of compiled string
-      @turtle(e,[state, @params, path, stack])
+      @turtle(e,[state, @params, pathX, pathY, stack])
     
-    # put path into nicer format for export
-    x = (p.x for p in path)
-    y = (p.y for p in path)
-    @path = {x: x, y: y} # store path for later lookup with getPath()
+    @path = {x: pathX, y: pathY} # store path for later lookup with getPath()
     
   turtle: (command, args) ->
     " return function to execute turtle graphics drawing command"
     commands = {
-      "F": (state, params, path) ->
+      "F": (state, params, pathX, pathY) ->
         " Move forward (in whatever direction you're facing) "
         # update state
         ang = (state.orientation % 360) * (Math.PI / 180)
         state.x += Math.cos(ang)*state.stepSize
         state.y += Math.sin(ang)*state.stepSize
         # add point to path
-        path.push({x: state.x, y: state.y})
+        pathX.push(state.x)
+        pathY.push(state.y)
       "+": (state) -> state.orientation += state.stepAngle
       "-": (state) -> state.orientation -= state.stepAngle
       "|": (state) -> state.orientation += 180
-      "[": (state, params, path, stack) -> 
+      "[": (state, params, pathX, pathY, stack) -> 
         " Save current state for a later return "
         stack.push(clone(state))
-      "]": (state, params, path, stack) -> 
+      "]": (state, params, pathX, pathY, stack) -> 
         " Return to last saved state "
         
         # Update current state to match popped state
@@ -91,7 +90,8 @@ class Lsys
         for key of pop
           state[key] = pop[key]
         # Add current state to path
-        path.push({x: state.x, y: state.y})
+        pathX.push(state.x)
+        pathY.push(state.y)
       "!": (state) -> state.stepAngle *= -1
       "(": (state, params) -> state.stepAngle *= (1 - params.angle.change)
       ")": (state, params) -> state.stepAngle *= (1 + params.angle.change)

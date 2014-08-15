@@ -180,16 +180,12 @@ Lsys = (function() {
 
   Lsys.prototype.calcPath = function() {
     " Generate path from compiled string and param values ";
-    var e, p, path, stack, startTime, state, x, y, _i, _len, _ref;
+    var e, pathX, pathY, stack, startTime, state, _i, _len, _ref;
     state = clone(this.params.pose);
     state.stepSize = this.params.size.value;
     state.stepAngle = this.params.angle.value;
-    path = [
-      {
-        x: state.x,
-        y: state.y
-      }
-    ];
+    pathX = [state.x];
+    pathY = [state.y];
     stack = [];
     startTime = new Date().getTime();
     _ref = this.compiledString;
@@ -198,29 +194,11 @@ Lsys = (function() {
       if ((new Date().getTime() - startTime) / 1000 > this.config.timeout) {
         break;
       }
-      this.turtle(e, [state, this.params, path, stack]);
+      this.turtle(e, [state, this.params, pathX, pathY, stack]);
     }
-    x = (function() {
-      var _j, _len1, _results;
-      _results = [];
-      for (_j = 0, _len1 = path.length; _j < _len1; _j++) {
-        p = path[_j];
-        _results.push(p.x);
-      }
-      return _results;
-    })();
-    y = (function() {
-      var _j, _len1, _results;
-      _results = [];
-      for (_j = 0, _len1 = path.length; _j < _len1; _j++) {
-        p = path[_j];
-        _results.push(p.y);
-      }
-      return _results;
-    })();
     return this.path = {
-      x: x,
-      y: y
+      x: pathX,
+      y: pathY
     };
   };
 
@@ -228,16 +206,14 @@ Lsys = (function() {
     " return function to execute turtle graphics drawing command";
     var commands;
     commands = {
-      "F": function(state, params, path) {
+      "F": function(state, params, pathX, pathY) {
         " Move forward (in whatever direction you're facing) ";
         var ang;
         ang = (state.orientation % 360) * (Math.PI / 180);
         state.x += Math.cos(ang) * state.stepSize;
         state.y += Math.sin(ang) * state.stepSize;
-        return path.push({
-          x: state.x,
-          y: state.y
-        });
+        pathX.push(state.x);
+        return pathY.push(state.y);
       },
       "+": function(state) {
         return state.orientation += state.stepAngle;
@@ -248,21 +224,19 @@ Lsys = (function() {
       "|": function(state) {
         return state.orientation += 180;
       },
-      "[": function(state, params, path, stack) {
+      "[": function(state, params, pathX, pathY, stack) {
         " Save current state for a later return ";
         return stack.push(clone(state));
       },
-      "]": function(state, params, path, stack) {
+      "]": function(state, params, pathX, pathY, stack) {
         " Return to last saved state ";
         var key, pop;
         pop = stack.pop();
         for (key in pop) {
           state[key] = pop[key];
         }
-        return path.push({
-          x: state.x,
-          y: state.y
-        });
+        pathX.push(state.x);
+        return pathY.push(state.y);
       },
       "!": function(state) {
         return state.stepAngle *= -1;
@@ -290,3 +264,72 @@ Lsys = (function() {
   return Lsys;
 
 })();
+
+var data, e, params, path, sys, x, y, _i, _j, _len, _len1;
+
+console.log("-----------------\n Running test \n-----------------");
+
+params = {
+  seed: "A",
+  rules: {
+    "A": "F[+F]F",
+    "B": "ABF-F",
+    "C": "CABF[+F>+F]F"
+  },
+  n: 1,
+  pose: {
+    x: 0,
+    y: 0,
+    orientation: 0
+  },
+  size: {
+    value: 10,
+    change: 1.0
+  },
+  angle: {
+    value: 10,
+    change: 1
+  }
+};
+
+sys = new Lsys(params);
+
+path = sys.getPath();
+
+console.log(["heres a path", path]);
+
+x = (function() {
+  var _i, _len, _results;
+  _results = [];
+  for (_i = 0, _len = path.length; _i < _len; _i++) {
+    e = path[_i];
+    _results.push(e.x);
+  }
+  return _results;
+})();
+
+y = (function() {
+  var _i, _len, _results;
+  _results = [];
+  for (_i = 0, _len = path.length; _i < _len; _i++) {
+    e = path[_i];
+    _results.push(e.y);
+  }
+  return _results;
+})();
+
+for (_i = 0, _len = path.length; _i < _len; _i++) {
+  data = path[_i];
+  console.log(data.x);
+}
+
+console.log("");
+
+for (_j = 0, _len1 = path.length; _j < _len1; _j++) {
+  data = path[_j];
+  console.log(data.y);
+}
+
+console.log("");
+
+console.log(sys.compiledString);

@@ -23,7 +23,8 @@ module.exports = function (grunt) {
         files: {
           'js/lsys.js': [
             'coffee/utils.coffee',
-            'coffee/lsys.coffee'
+            'coffee/lsys.coffee',
+            'coffee/test.coffee'
           ]
         }
       }
@@ -38,7 +39,7 @@ module.exports = function (grunt) {
     watch: {
       test: {
         files: ['coffee/*.coffee'],
-        tasks: ['coffee:compile','uglify:main','concat:test', 'run:eval']
+        tasks: ['concat:test', 'run:eval']
       },
       dev: {
         files: ['coffee/*.coffee'],
