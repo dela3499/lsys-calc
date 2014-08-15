@@ -116,6 +116,7 @@ Lsys = (function() {
     if (params == null) {
       params = {};
     }
+    this.initTurtleCommands();
     this.params = params;
     this.path = [];
     this.config = {
@@ -203,9 +204,17 @@ Lsys = (function() {
   };
 
   Lsys.prototype.turtle = function(command, args) {
-    " return function to execute turtle graphics drawing command";
-    var commands;
-    commands = {
+    var _ref;
+    if (this.turtleCommands[command]) {
+      return (_ref = this.turtleCommands)[command].apply(_ref, args);
+    } else {
+      return null;
+    }
+  };
+
+  Lsys.prototype.initTurtleCommands = function() {
+    " initialize object with functions to execute turtle graphics drawing commands";
+    return this.turtleCommands = {
       "F": function(state, params, pathX, pathY) {
         " Move forward (in whatever direction you're facing) ";
         var ang;
@@ -254,11 +263,6 @@ Lsys = (function() {
         return state.stepSize *= 1 - params.size.change;
       }
     };
-    if (commands[command]) {
-      return commands[command].apply(commands, args);
-    } else {
-      return null;
-    }
   };
 
   return Lsys;

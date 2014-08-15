@@ -1,5 +1,6 @@
 class Lsys
   constructor: (params = {}) ->
+    @initTurtleCommands() # generate all the turle drawing commands 
     @params = params
     @path = []
     @config = {
@@ -62,11 +63,19 @@ class Lsys
       # update state, stack, and path with each character of compiled string
       @turtle(e,[state, @params, pathX, pathY, stack])
     
-    @path = {x: pathX, y: pathY} # store path for later lookup with getPath()
-    
+    @path = {x: pathX, y: pathY} # store path for later lookup with getPath()  
+
   turtle: (command, args) ->
-    " return function to execute turtle graphics drawing command"
-    commands = {
+    if @turtleCommands[command]
+      # True for any drawing command
+      return @turtleCommands[command](args...)
+    else 
+      # This will be the case for any rule name, or random character
+      return null # do nothing    
+    
+  initTurtleCommands: ->
+    " initialize object with functions to execute turtle graphics drawing commands"
+    @turtleCommands = {
       "F": (state, params, pathX, pathY) ->
         " Move forward (in whatever direction you're facing) "
         # update state
@@ -98,10 +107,3 @@ class Lsys
       "<": (state, params) -> state.stepSize *= (1 + params.size.change)
       ">": (state, params) -> state.stepSize *= (1 - params.size.change)
     }
-
-    if commands[command]
-      # True for any drawing command
-      return commands[command](args...)
-    else 
-      # This will be the case for any rule name, or random character
-      return null # do nothing
