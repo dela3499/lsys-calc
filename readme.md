@@ -11,7 +11,7 @@ To begin generating your own L-systems, you'll need just a few commands:
     params = {}                  # define system params
     sys = new Lsys(params)       # create new system (params argument is optional)
     sys.setParams(params)        # update system with params
-    drawPath = sys.getDrawPath() # get data for plotting
+    drawPath = sys.getPath() # get data for plotting
     plot(drawPath.x,drawPath.y)  # plot the system    
     
 The params object should look something more like this: 
