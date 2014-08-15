@@ -17,6 +17,9 @@ module.exports = function (grunt) {
     },
     coffee: {
       compile: {
+        options: {
+          bare: true
+        },
         files: {
           'js/lsys.js': [
             'coffee/utils.coffee',

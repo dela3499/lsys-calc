@@ -59,7 +59,7 @@ class Lsys
       if (new Date().getTime() - startTime)/1000 > @config.timeout 
         break
       # update state, stack, and path with each character of compiled string
-      @turtle(e,[state, params, path, stack])
+      @turtle(e,[state, @params, path, stack])
     
     # put path into nicer format for export
     x = (p.x for p in path)

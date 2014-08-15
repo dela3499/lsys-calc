@@ -25,11 +25,8 @@ objectDiff = (a, b) ->
   " Return array of top-level properties which differ between objects a and b "
   diff = []
   keys = getKeys([a,b])
-  console.log('ObjectDiff')
   for k in keys
-    console.log('ObjectDiff',[a,b])
     if a[k] instanceof Object and b[k] instanceof Object
-      console.log('ObjectDiff')
       diff.push k if objectDiff(a[k],b[k]).length > 0
     else
       diff.push(k) if a[k] != b[k]
