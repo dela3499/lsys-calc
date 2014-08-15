@@ -2,7 +2,7 @@ class Lsys
   constructor: (params = {}) ->
     @initTurtleCommands() # generate all the turle drawing commands 
     @params = params
-    @path = []
+    @path = {x:[],y:[]}
     @config = {
       timeout: 5 # timeout in seconds (if method times out, it will be noted in @errors)
     }
@@ -50,8 +50,15 @@ class Lsys
     state = clone(@params.pose)
     state.stepSize = @params.size.value
     state.stepAngle = @params.angle.value
-    pathX = [state.x]
-    pathY = [state.y]
+    
+    # Clear x and y arrays (instead of creating new ones, which requires more garbage collection)
+    @path.x.length = 0
+    @path.y.length = 0
+    
+    # Initialize x and y arrays
+    @path.x.push(state.x)
+    @path.y.push(state.y)
+    
     stack = [] # bookmarks a state to return to later in path definition
     
     startTime = new Date().getTime()
@@ -61,9 +68,10 @@ class Lsys
       if (new Date().getTime() - startTime)/1000 > @config.timeout 
         break
       # update state, stack, and path with each character of compiled string
-      @turtle(e,[state, @params, pathX, pathY, stack])
+      @turtle(e,[state, @params, @path.x, @path.y, stack])
     
-    @path = {x: pathX, y: pathY} # store path for later lookup with getPath()  
+    
+#    @path = {x: pathX, y: pathY} # store path for later lookup with getPath()  
 
   turtle: (command, args) ->
     if @turtleCommands[command]

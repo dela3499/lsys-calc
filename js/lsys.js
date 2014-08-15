@@ -118,7 +118,10 @@ Lsys = (function() {
     }
     this.initTurtleCommands();
     this.params = params;
-    this.path = [];
+    this.path = {
+      x: [],
+      y: []
+    };
     this.config = {
       timeout: 5
     };
@@ -181,26 +184,27 @@ Lsys = (function() {
 
   Lsys.prototype.calcPath = function() {
     " Generate path from compiled string and param values ";
-    var e, pathX, pathY, stack, startTime, state, _i, _len, _ref;
+    var e, stack, startTime, state, _i, _len, _ref, _results;
     state = clone(this.params.pose);
     state.stepSize = this.params.size.value;
     state.stepAngle = this.params.angle.value;
-    pathX = [state.x];
-    pathY = [state.y];
+    this.path.x.length = 0;
+    this.path.y.length = 0;
+    this.path.x.push(state.x);
+    this.path.y.push(state.y);
+    s;
     stack = [];
     startTime = new Date().getTime();
     _ref = this.compiledString;
+    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       e = _ref[_i];
       if ((new Date().getTime() - startTime) / 1000 > this.config.timeout) {
         break;
       }
-      this.turtle(e, [state, this.params, pathX, pathY, stack]);
+      _results.push(this.turtle(e, [state, this.params, this.path.x, this.path.y, stack]));
     }
-    return this.path = {
-      x: pathX,
-      y: pathY
-    };
+    return _results;
   };
 
   Lsys.prototype.turtle = function(command, args) {
