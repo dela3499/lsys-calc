@@ -62,3 +62,11 @@ clone = (obj) ->
     newInstance[key] = clone obj[key]
 
   return newInstance
+
+cloneFromPool = (obj, pool) -> 
+  if not obj? or typeof obj isnt 'object'
+    return obj
+  poolObj = pool.pop()
+  for key of obj
+    poolObj[key] = cloneFromPool obj[key]
+  return poolObj

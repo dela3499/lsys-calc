@@ -1,4 +1,4 @@
-var clone, flatten, foundIn, getKeys, objectDiff, unique,
+var clone, cloneFromPool, flatten, foundIn, getKeys, objectDiff, unique,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 flatten = function(array) {
@@ -109,10 +109,23 @@ clone = function(obj) {
   return newInstance;
 };
 
+cloneFromPool = function(obj, pool) {
+  var key, poolObj;
+  if ((obj == null) || typeof obj !== 'object') {
+    return obj;
+  }
+  poolObj = pool.pop();
+  for (key in obj) {
+    poolObj[key] = cloneFromPool(obj[key]);
+  }
+  return poolObj;
+};
+
 var Lsys;
 
 Lsys = (function() {
   function Lsys(params) {
+    var i, poolSize;
     if (params == null) {
       params = {};
     }
@@ -130,6 +143,19 @@ Lsys = (function() {
       pathCreation: false
     };
     this.compileRules(params);
+    this.state = clone(this.params.pose);
+    this.state.stepSize = this.params.size.value;
+    this.state.stepAngle = this.params.angle.value;
+    this.stack = [];
+    poolSize = 10000;
+    this.pool = (function() {
+      var _i, _results;
+      _results = [];
+      for (i = _i = 0; 0 <= poolSize ? _i <= poolSize : _i >= poolSize; i = 0 <= poolSize ? ++_i : --_i) {
+        _results.push({});
+      }
+      return _results;
+    })();
     this.calcPath();
     return this;
   }
@@ -144,9 +170,6 @@ Lsys = (function() {
       params = this.params;
     }
     " Update parameters (and recompile rules if needed) ";
-    if (!this.isomorphic(params, this.params)) {
-      this.compileRules(params);
-    }
     this.params = params;
     this.calcPath();
     return this;
@@ -184,25 +207,25 @@ Lsys = (function() {
 
   Lsys.prototype.calcPath = function() {
     " Generate path from compiled string and param values ";
-    var e, stack, startTime, state, _i, _len, _ref, _results;
-    state = clone(this.params.pose);
-    state.stepSize = this.params.size.value;
-    state.stepAngle = this.params.angle.value;
+    var argArray, e, _i, _len, _ref, _results;
     this.path.x.length = 0;
     this.path.y.length = 0;
-    this.path.x.push(state.x);
-    this.path.y.push(state.y);
-    s;
-    stack = [];
-    startTime = new Date().getTime();
+    this.path.x.push(this.state.x);
+    this.path.y.push(this.state.y);
+    this.stack.length = 0;
+    argArray = [];
     _ref = this.compiledString;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       e = _ref[_i];
-      if ((new Date().getTime() - startTime) / 1000 > this.config.timeout) {
-        break;
-      }
-      _results.push(this.turtle(e, [state, this.params, this.path.x, this.path.y, stack]));
+      argArray.length = 0;
+      argArray.push(this.state);
+      argArray.push(this.params);
+      argArray.push(this.path.x);
+      argArray.push(this.path.y);
+      argArray.push(this.stack);
+      argArray.push(this.pool);
+      _results.push(this.turtle(e, argArray));
     }
     return _results;
   };
@@ -221,10 +244,8 @@ Lsys = (function() {
     return this.turtleCommands = {
       "F": function(state, params, pathX, pathY) {
         " Move forward (in whatever direction you're facing) ";
-        var ang;
-        ang = (state.orientation % 360) * (Math.PI / 180);
-        state.x += Math.cos(ang) * state.stepSize;
-        state.y += Math.sin(ang) * state.stepSize;
+        state.x += Math.cos((state.orientation % 360) * (Math.PI / 180)) * state.stepSize;
+        state.y += Math.sin((state.orientation % 360) * (Math.PI / 180)) * state.stepSize;
         pathX.push(state.x);
         return pathY.push(state.y);
       },
@@ -237,14 +258,15 @@ Lsys = (function() {
       "|": function(state) {
         return state.orientation += 180;
       },
-      "[": function(state, params, pathX, pathY, stack) {
+      "[": function(state, params, pathX, pathY, stack, pool) {
         " Save current state for a later return ";
-        return stack.push(clone(state));
+        return stack.push(cloneFromPool(state, pool));
       },
-      "]": function(state, params, pathX, pathY, stack) {
+      "]": function(state, params, pathX, pathY, stack, pool) {
         " Return to last saved state ";
         var key, pop;
         pop = stack.pop();
+        pool.push(pop);
         for (key in pop) {
           state[key] = pop[key];
         }
