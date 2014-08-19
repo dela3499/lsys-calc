@@ -207,25 +207,13 @@ Lsys = (function() {
 
   Lsys.prototype.calcPath = function() {
     " Generate path from compiled string and param values ";
-    var argArray, e, _i, _len, _ref, _results;
-    this.path.x.length = 0;
-    this.path.y.length = 0;
-    this.path.x.push(this.state.x);
-    this.path.y.push(this.state.y);
+    var e, _i, _len, _ref, _results;
     this.stack.length = 0;
-    argArray = [];
     _ref = this.compiledString;
     _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       e = _ref[_i];
-      argArray.length = 0;
-      argArray.push(this.state);
-      argArray.push(this.params);
-      argArray.push(this.path.x);
-      argArray.push(this.path.y);
-      argArray.push(this.stack);
-      argArray.push(this.pool);
-      _results.push(this.turtle(e, argArray));
+      _results.push(this.turtle(e, [this.state, this.params, this.stack, this.pool]));
     }
     return _results;
   };
@@ -242,12 +230,10 @@ Lsys = (function() {
   Lsys.prototype.initTurtleCommands = function() {
     " initialize object with functions to execute turtle graphics drawing commands";
     return this.turtleCommands = {
-      "F": function(state, params, pathX, pathY) {
+      "F": function(state, params) {
         " Move forward (in whatever direction you're facing) ";
         state.x += Math.cos((state.orientation % 360) * (Math.PI / 180)) * state.stepSize;
-        state.y += Math.sin((state.orientation % 360) * (Math.PI / 180)) * state.stepSize;
-        pathX.push(state.x);
-        return pathY.push(state.y);
+        return state.y += Math.sin((state.orientation % 360) * (Math.PI / 180)) * state.stepSize;
       },
       "+": function(state) {
         return state.orientation += state.stepAngle;
@@ -258,20 +244,20 @@ Lsys = (function() {
       "|": function(state) {
         return state.orientation += 180;
       },
-      "[": function(state, params, pathX, pathY, stack, pool) {
+      "[": function(state, params, stack, pool) {
         " Save current state for a later return ";
         return stack.push(cloneFromPool(state, pool));
       },
-      "]": function(state, params, pathX, pathY, stack, pool) {
+      "]": function(state, params, stack, pool) {
         " Return to last saved state ";
-        var key, pop;
+        var key, pop, _results;
         pop = stack.pop();
         pool.push(pop);
+        _results = [];
         for (key in pop) {
-          state[key] = pop[key];
+          _results.push(state[key] = pop[key]);
         }
-        pathX.push(state.x);
-        return pathY.push(state.y);
+        return _results;
       },
       "!": function(state) {
         return state.stepAngle *= -1;

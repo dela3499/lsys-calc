@@ -60,33 +60,33 @@ class Lsys
   calcPath: ->
     " Generate path from compiled string and param values "
     # Clear x and y arrays (instead of creating new ones, which requires more garbage collection)
-    @path.x.length = 0
-    @path.y.length = 0
+#    @path.x.length = 0
+#    @path.y.length = 0
     
     # Initialize x and y arrays
-    @path.x.push(@state.x)
-    @path.y.push(@state.y)
+#    @path.x.push(@state.x)
+#    @path.y.push(@state.y)
     
     # Clear stack, which bookmarks a state to return to later in path definition
     @stack.length = 0
     
     #startTime = new Date().getTime()
     # execute turtle graphics drawing command
-    argArray = []
+#    argArray = []
     for e in @compiledString
       # break out of loop if it's taking too long
 #      if (new Date().getTime() - startTime)/1000 > @config.timeout # commenting out for now, since I'm creating a new Date object for every drawing operation
 #        break
       # update state, stack, and path with each character of compiled string
-      argArray.length = 0
-      argArray.push(@state)
-      argArray.push(@params)
-      argArray.push(@path.x)
-      argArray.push(@path.y)
-      argArray.push(@stack)
-      argArray.push(@pool)
-      @turtle(e, argArray)
-#      @turtle(e,[@state, @params, @path.x, @path.y, @stack, @pool])
+#      argArray.length = 0
+#      argArray.push(@state)
+#      argArray.push(@params)
+#      argArray.push(@path.x)
+#      argArray.push(@path.y)
+#      argArray.push(@stack)
+#      argArray.push(@pool)
+#      @turtle(e, argArray)
+      @turtle(e,[@state, @params, @stack, @pool])
     
     
 #    @path = {x: pathX, y: pathY} # store path for later lookup with getPath()  
@@ -102,22 +102,22 @@ class Lsys
   initTurtleCommands: ->
     " initialize object with functions to execute turtle graphics drawing commands"
     @turtleCommands = {
-      "F": (state, params, pathX, pathY) ->
+      "F": (state, params) ->
         " Move forward (in whatever direction you're facing) "
         # update state
         # ang = (state.orientation % 360) * (Math.PI / 180) // try not to create any objects or values
         state.x += Math.cos((state.orientation % 360) * (Math.PI / 180))*state.stepSize
         state.y += Math.sin((state.orientation % 360) * (Math.PI / 180))*state.stepSize
         # add point to path
-        pathX.push(state.x)
-        pathY.push(state.y)
+#        pathX.push(state.x)
+#        pathY.push(state.y)
       "+": (state) -> state.orientation += state.stepAngle
       "-": (state) -> state.orientation -= state.stepAngle
       "|": (state) -> state.orientation += 180
-      "[": (state, params, pathX, pathY, stack, pool) -> 
+      "[": (state, params, stack, pool) -> 
         " Save current state for a later return "
         stack.push(cloneFromPool(state, pool))
-      "]": (state, params, pathX, pathY, stack, pool) -> 
+      "]": (state, params, stack, pool) -> 
         " Return to last saved state "
         
         # Update current state to match popped state
@@ -127,8 +127,8 @@ class Lsys
         for key of pop
           state[key] = pop[key]
         # Add current state to path
-        pathX.push(state.x)
-        pathY.push(state.y)
+#        pathX.push(state.x)
+#        pathY.push(state.y)
       "!": (state) -> state.stepAngle *= -1
       "(": (state, params) -> state.stepAngle *= (1 - params.angle.change)
       ")": (state, params) -> state.stepAngle *= (1 + params.angle.change)
