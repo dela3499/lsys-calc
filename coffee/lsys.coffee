@@ -74,23 +74,17 @@ class Lsys
     # execute turtle graphics drawing command
 #    argArray = []
     for e in @compiledString
-      # break out of loop if it's taking too long
-#      if (new Date().getTime() - startTime)/1000 > @config.timeout # commenting out for now, since I'm creating a new Date object for every drawing operation
-#        break
-      # update state, stack, and path with each character of compiled string
-#      argArray.length = 0
-#      argArray.push(@state)
-#      argArray.push(@params)
-#      argArray.push(@path.x)
-#      argArray.push(@path.y)
-#      argArray.push(@stack)
-#      argArray.push(@pool)
-#      @turtle(e, argArray)
       @turtle(e,[@state, @params, @stack, @pool])
     
     
 #    @path = {x: pathX, y: pathY} # store path for later lookup with getPath()  
-  
+  getNextPoint: -> 
+    " Calculate and return next point on path " 
+    start = @currentPathPosition
+    end = @compiledString.length - 1
+    for i in [start..end]
+      @turtle(@compiledString[i],[@state, @params, @stack, @pool])
+      
   turtle: (command, args) ->
     if @turtleCommands[command]
       # True for any drawing command
